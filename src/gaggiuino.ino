@@ -234,12 +234,12 @@ static void pageValuesRefresh(bool forcedUpdate) {  // Refreshing our values on 
     runningCfg.pressureProfilingHold          = myNex.readNumber("ppHold"); // pp start pressure hold
     runningCfg.pressureProfilingLength        = myNex.readNumber("ppLength"); // pp shot length
 
-    runningCfg.flowProfileStart               = myNex.readNumber("ppFlowStart");
-    runningCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish");
+    runningCfg.flowProfileStart               = myNex.readNumber("ppFlowStart")/10;
+    runningCfg.flowProfileEnd                 = myNex.readNumber("ppFlowFinish")/10;
     runningCfg.flowProfilePressureTarget      = myNex.readNumber("ppFlowPressure");
     runningCfg.flowProfileCurveSpeed          = myNex.readNumber("ppFlowCurveSpeed");
 
-    runningCfg.preinfusionFlowVol             = myNex.readNumber("piFlow");
+    runningCfg.preinfusionFlowVol             = myNex.readNumber("piFlow")/10;
     runningCfg.preinfusionFlowTime            = myNex.readNumber("piFlowTime" );
     runningCfg.preinfusionFlowSoakTime        = myNex.readNumber("piFlowSoak");
     runningCfg.preinfusionFlowPressureTarget  = myNex.readNumber("piFlowPressure");
