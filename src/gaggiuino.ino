@@ -36,6 +36,7 @@ bool tareDone = false;
 
 // brew detection vars
 bool brewActive;
+bool brewBlocked;
 
 //PP&PI variables
 //default phases. Updated in updatePressureProfilePhases.
@@ -205,17 +206,15 @@ static void calculateWeightAndFlow(void) {
 
 // Stops the pump if setting active and dose/weight conditions met
 bool stopOnWeight() {
-  if (selectedOperationalMode != OPMODE_flush || selectedOperationalMode != OPMODE_descale || selectedOperationalMode != OPMODE_steam)
-  {
+  if (brewActive) {
     if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight < 1.f) {
-      if (shotWeight > runningCfg.shotDose-0.5f ) return true;
-      else return false;
+      if (shotWeight > runningCfg.shotDose-0.5f ) brewBlocked = true;
+      else brewBlocked = false;
     } else if(runningCfg.stopOnWeightState && runningCfg.shotStopOnCustomWeight > 1.f) {
-      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) return true;
-      else return false;
+      if (shotWeight > runningCfg.shotStopOnCustomWeight-0.5f) brewBlocked = true;
+      else brewBlocked = false;
     }
   }
-  return false;
 }
 //##############################################################################################################################
 //############################################______PAGE_CHANGE_VALUES_REFRESH_____#############################################
@@ -541,6 +540,7 @@ void trigger1(void) {
       eepromCurrentValues.shotDose = myNex.readNumber("shotDose") / 10.f;
       eepromCurrentValues.shotPreset = myNex.readNumber("shotPreset");
       eepromCurrentValues.shotStopOnCustomWeight = myNex.readNumber("shotCustomVal") / 10.f;
+      break;
     case 6:
       eepromCurrentValues.setpoint    = myNex.readNumber("setPoint");
       eepromCurrentValues.offsetTemp  = myNex.readNumber("offSet");
@@ -729,6 +729,8 @@ static void profiling(void) {
   }
   // Keep that water at temp
   justDoCoffee();
+  // Stop the pump when target weight in cup achieved
+  stopOnWeight();
 }
 
 static void manualPressureProfile(void) {
@@ -744,19 +746,20 @@ static void manualPressureProfile(void) {
 static void brewDetect(void) {
   static bool paramsReset = true;
 
-  if ( brewState() && !stopOnWeight()) {
+  if ( brewState() && !brewBlocked) {
     if(!paramsReset) {
       brewParamsReset();
       paramsReset = true;
     }
     openValve();
     brewActive = true;
-  } else if ( brewState() && stopOnWeight()) {
+  } else if ( brewState() && brewBlocked) {
     closeValve();
     brewActive = false;
-  } else if (!brewState()){
+  } else {
     closeValve();
     brewActive = false;
+    brewBlocked = false;
     if(paramsReset) {
       brewParamsReset();
       paramsReset = false;
