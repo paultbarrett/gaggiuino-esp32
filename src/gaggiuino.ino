@@ -170,6 +170,9 @@ static void sensorsReadPressure(void) {
   }
 }
 
+long totalClicks;
+long lastClickCount;
+
 static void calculateWeightAndFlow(void) {
   if (brewActive) {
     if (scalesIsPresent()) {
@@ -177,8 +180,10 @@ static void calculateWeightAndFlow(void) {
     }
 
     long elapsedTime = millis() - flowTimer;
+    totalClicks += getAndResetClickCounter();
     if (elapsedTime > REFRESH_FLOW_EVERY) {
-      long pumpClicks =  getAndResetClickCounter();
+      // long pumpClicks =  getAndResetClickCounter();
+      long pumpClicks = totalClicks - lastClickCount;
       float cps = 1000.f * pumpClicks / elapsedTime;
       currentState.pumpFlow = getPumpFlow(cps, currentState.pressure);
 
@@ -401,6 +406,7 @@ static void lcdRefresh(void) {
 
     /*LCD temp output*/
     lcdSetTemperature(currentState.temperature - runningCfg.offsetTemp);
+    // lcdSetTemperature(totalClicks);
 
     /*LCD weight output*/
     if (lcdCurrentPageId == 0 && homeScreenScalesEnabled) {
@@ -642,22 +648,23 @@ static void profiling(void) {
   if (brewActive) { //runs this only when brew button activated and pressure profile selected
     long timeInPP = millis() - brewingTimer;
     CurrentPhase currentPhase = phases.getCurrentPhase(timeInPP);
-    preinfusionFinished = currentPhase.phaseIndex >= preInfusionFinishedPhaseIdx;
 
-    if (phases.phases[currentPhase.phaseIndex].type == PHASE_TYPE_PRESSURE) {
-      float newBarValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
-      float flowRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+    preinfusionFinished = currentPhase.index >= preInfusionFinishedPhaseIdx;
+
+    if (currentPhase.phase.type == PHASE_TYPE_PRESSURE) {
+      float newBarValue = currentPhase.getTarget();
+      float flowRestriction =  currentPhase.getRestriction();
       setPumpPressure(newBarValue, flowRestriction, currentState);
 
       pressureTargetComparator = preinfusionFinished ? newBarValue : currentState.pressure;
     } else {
-      float newFlowValue = phases.phases[currentPhase.phaseIndex].getTarget(currentPhase.timeInPhase);
-      float pressureRestriction =  phases.phases[currentPhase.phaseIndex].getRestriction(currentPhase.timeInPhase);
+      float newFlowValue = currentPhase.getTarget();
+      float pressureRestriction =  currentPhase.getRestriction();
       setPumpFlow(newFlowValue, pressureRestriction, currentState);
     }
   }
   else {
-    setPumpToRawValue(0);
+    setPumpOff();
   }
   // Keep that water at temp
   justDoCoffee();
@@ -703,5 +710,8 @@ static void brewParamsReset() {
   previousWeight = 0.f;
   brewingTimer = millis();
   preinfusionFinished = false;
+
+  totalClicks = 0;
+  lastClickCount = 0;
 }
 
