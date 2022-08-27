@@ -3,3 +3,4 @@
 .pio/
 src/.theia/
 src/build
+platformio_override.ini

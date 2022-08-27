@@ -1,5 +1,10 @@
+#ifdef ESP32
+#include "ArduinoJson.h"
+#include "LittleFS.h"
+#else
 #define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
 #include <FlashStorage_STM32.h>
+#endif
 #include "eeprom_data.h"
 
 static struct eepromMetadata_t eepromMetadata;
@@ -178,4 +183,24 @@ void eepromInit(void) {
 
 struct eepromValues_t eepromGetCurrentValues(void) {
   return eepromMetadata.values;
+}
+
+void configClearSaved()
+{ // Clear out all local storage
+    nextionSendCmd("page boot");
+    nextionSetAttr("boot.bootStatus.txt", "\"Resetting system...\"");
+    debugPrintln(F("RESET: Formatting SPIFFS"));
+    LittleFS.format();
+    debugPrintln(F("RESET: Clearing WiFiManager settings..."));
+    WiFiManager wifiManager;
+    wifiManager.resetSettings();
+    EEPROM.begin(512);
+    debugPrintln(F("Clearing EEPROM..."));
+    for (uint16_t i = 0; i < EEPROM.length(); i++)
+    {
+        EEPROM.write(i, 0);
+    }
+    nextionSetAttr("boot.bootStatus.txt", "\"Rebooting system...\"");
+    debugPrintln(F("RESET: Rebooting device"));
+    espReset();
 }

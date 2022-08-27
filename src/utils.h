@@ -3,4 +3,5 @@
 
 #include "Arduino.h"
 float mapRange(float sourceNumber, float fromA, float fromB, float toA, float toB, int decimalPrecision);
+void debugPrintln(String debugText);
 #endif
