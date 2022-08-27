@@ -10,6 +10,7 @@
 #include "peripherals/scales.h"
 #include "peripherals/peripherals.h"
 #include "peripherals/thermocouple.h"
+#include "peripherals/front_panel.h"
 #include "sensors_state.h"
 #include "functional/descale.h"
 #include "functional/just_do_coffee.h"

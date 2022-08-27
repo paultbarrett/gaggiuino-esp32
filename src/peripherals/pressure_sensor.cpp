@@ -6,8 +6,10 @@ float previousPressure;
 float currentPressure;
 #ifdef SINGLE_BOARD
   ADS1015 ADS(0x48);
+#elif ESP32
+  ADS1115 ADS(ADS1115_addr,&I2C_0);
 #else
-  ADS1115 ADS(0x48);
+  ADS1115 ADS(0x48)
 #endif
 
 void pressureSensorInit() {

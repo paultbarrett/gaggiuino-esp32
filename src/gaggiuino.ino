@@ -20,6 +20,15 @@ void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
 
+  #if defined(I2C_SDA) || defined(I2C_SCL)
+  i2cInit();
+  #endif
+
+  #ifdef PCF8574_FRONTPANEL
+  // Front panel;
+  frontPanelInit();
+  #endif
+
   lcdInit();
   LOG_INFO("LCD Init");
 
@@ -523,14 +532,14 @@ static void brewParamsReset() {
 
 static void flushActivated(void) {
   setPumpFullOn();
-  #ifdef SINGLE_BOARD
+  #if defined(SINGLE_BOARD) || defined(ESP32)
       openValve();
   #endif
 }
 
 static void flushDeactivated(void) {
   setPumpOff();
-  #ifdef SINGLE_BOARD
+  #ifdef defined(SINGLE_BOARD) || defined(ESP32)
       closeValve();
   #endif
 }
