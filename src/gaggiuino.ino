@@ -3,6 +3,7 @@
 #endif
 
 #include "gaggiuino.h"
+#include "networkservices.h"
 
 SimpleKalmanFilter smoothPressure(2, 2, 1.00);
 
@@ -16,17 +17,33 @@ OPERATION_MODES selectedOperationalMode;
 
 eepromValues_t runningCfg;
 
+// Non default I2C pins
+#if defined(I2C_SDA) || defined(I2C_SCL)
+TwoWire I2C_0 = TwoWire(0);
+#endif
+
+// void i2cInit()
+// {
+//   I2C_0.begin(I2C_SDA, I2C_SCL);
+// }
+
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
 
   #if defined(I2C_SDA) || defined(I2C_SCL)
-  i2cInit();
+  // i2cInit();
+  I2C_0.begin(I2C_SDA, I2C_SCL);
   #endif
 
   #ifdef PCF8574_FRONTPANEL
   // Front panel;
   frontPanelInit();
+  #endif
+
+  #ifdef ESP32
+  wifiInit();
+  networkServicesInit();
   #endif
 
   lcdInit();
@@ -539,7 +556,7 @@ static void flushActivated(void) {
 
 static void flushDeactivated(void) {
   setPumpOff();
-  #ifdef defined(SINGLE_BOARD) || defined(ESP32)
+  #if defined(SINGLE_BOARD) || defined(ESP32)
       closeValve();
   #endif
 }

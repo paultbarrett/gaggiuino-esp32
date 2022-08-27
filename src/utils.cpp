@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "networkservices.h"
 
 float mapRange(float refNumber, float refStart, float refEnd, float targetStart, float targetEnd, int decimalPrecision) {
   float deltaRef = refEnd - refStart;

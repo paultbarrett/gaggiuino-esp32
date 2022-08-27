@@ -1,11 +1,15 @@
 #ifdef ESP32
-#include "ArduinoJson.h"
-#include "LittleFS.h"
+  /* Future file based config
+  #include "ArduinoJson.h"
+  #include "LittleFS.h"
+  */
+  #include "EEPROM.h"
 #else
-#define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
-#include <FlashStorage_STM32.h>
+  #define STM32F4 // This define has to be here otherwise the include of FlashStorage_STM32.h bellow fails.
+  #include <FlashStorage_STM32.h>
 #endif
 #include "eeprom_data.h"
+#include "utils.h"
 
 static struct eepromMetadata_t eepromMetadata;
 
@@ -185,22 +189,18 @@ struct eepromValues_t eepromGetCurrentValues(void) {
   return eepromMetadata.values;
 }
 
+/* Future file based config
 void configClearSaved()
 { // Clear out all local storage
-    nextionSendCmd("page boot");
-    nextionSetAttr("boot.bootStatus.txt", "\"Resetting system...\"");
-    debugPrintln(F("RESET: Formatting SPIFFS"));
+    debugPrintln(F("RESET: Formatting LITTLEFS"));
     LittleFS.format();
-    debugPrintln(F("RESET: Clearing WiFiManager settings..."));
-    WiFiManager wifiManager;
-    wifiManager.resetSettings();
     EEPROM.begin(512);
-    debugPrintln(F("Clearing EEPROM..."));
+    debugPrintln(F("RESET: Clearing EEPROM..."));
     for (uint16_t i = 0; i < EEPROM.length(); i++)
     {
         EEPROM.write(i, 0);
     }
-    nextionSetAttr("boot.bootStatus.txt", "\"Rebooting system...\"");
     debugPrintln(F("RESET: Rebooting device"));
-    espReset();
+    ESP.restart();
 }
+*/

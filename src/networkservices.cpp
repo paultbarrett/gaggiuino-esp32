@@ -2,7 +2,7 @@
 #include "networkservices.h"
 // #include "nextion.h"
 // #include "web.h"
-#include "util.h"
+#include "utils.h"
 
 #include "arduino.h"
 #include "WiFi.h"
@@ -13,37 +13,61 @@
 // #include "WiFiUdp.h"
 // #include "ArduinoOTA.h"
 
+String currentIP;                               // Current IP address
+const char* wifiSSID = WIFI_SSID;
+const char* wifiPass = WIFI_PASS;
+const unsigned long reconnectTimeout = 15;      // Timeout for WiFi reconnection attempts in seconds
+
 WiFiClient telnetClient;
 WiFiServer telnetServer(23);
 FtpServer ftpServer;
 
-const unsigned long telnetInputMax = 128; // Size of user input buffer for user telnet session
+const unsigned long telnetInputMax = 128;       // Size of user input buffer for user telnet session
 
 void networkServicesInit()
 {
-
-    httpOTAInit();
     telnetInit();
     // mDNSInit();
     ftpInit();
-    // arduinoOTAInit();
 }
 
 void wifiInit()
 {
+    // Assign our hostname before connecting to WiFi
+    //WiFi.hostname("Gaggia");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(wifiSSID, wifiPass);
     
 }
 
-void httpOTAInit()
+void wifiCheck()
 {
-    if ((configPassword[0] != '\0') && (configUser[0] != '\0'))
-    { // Start the webserver with our assigned password if it's been configured...
-        httpOTAUpdate.setup(&webServer, "/update", configUser, configPassword);
+    while ((WiFi.status() != WL_CONNECTED) || (currentIP == "0.0.0.0"))
+    { // Check if Wifi is connected and there is a valid IP.
+        if (WiFi.status() == WL_CONNECTED)
+        { // Disconnect if currently connected without a valid IP
+            WiFi.disconnect();
+        }
+        wifiReconnect();
     }
-    else
-    { // or without a password if not
-        httpOTAUpdate.setup(&webServer, "/update");
+}
+
+void wifiReconnect()
+{ 
+
+    debugPrintln(F("WIFI: Reconnecting to wireless network..."));
+    wifiInit();
+
+    unsigned long wifiReconnectTimer = millis();
+    while (WiFi.status() != WL_CONNECTED) // POSSIBLY BLOCKING NEEDS REVIEW
+    {
+        delay(500);
+        if (millis() >= (wifiReconnectTimer + (reconnectTimeout * 1000)))
+        {
+            debugPrintln(F("WIFI: Failed to reconnect and hit timeout"));
+        }
     }
+    currentIP = WiFi.localIP().toString();
 }
 
 void telnetInit()
@@ -113,12 +137,6 @@ void handleTelnetClient()
             { // telnet line endings should be CRLF: https://tools.ietf.org/html/rfc5198#appendix-C
               // If we get a CR just ignore it
             }
-            else if (telnetInputByte == 10)
-            {                                            // We've caught a LF (DEC 10), send buffer contents to the Nextion
-                telnetInputBuffer[telnetInputIndex] = 0; // null terminate our char array
-                nextionSendCmd(String(telnetInputBuffer));
-                telnetInputIndex = 0;
-            }
             else if (telnetInputIndex < telnetInputMax)
             { // If we have room left in our buffer add the current byte
                 telnetInputBuffer[telnetInputIndex] = telnetInputByte;
@@ -171,6 +189,5 @@ void networkServicesHandle()
 {
     ftpServer.handleFTP();
     handleTelnetClient();
-    // ArduinoOTA.handle();
     // MDNS.update();
 }

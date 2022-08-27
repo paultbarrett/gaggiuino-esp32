@@ -8,15 +8,15 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-// Non default I2C pins
-#if defined(I2C_SDA) || defined(I2C_SCL)
-TwoWire I2C_0 = TwoWire(0);
-#endif
+// // Non default I2C pins
+// #if defined(I2C_SDA) || defined(I2C_SCL)
+// TwoWire I2C_0 = TwoWire(0);
+// #endif
 
-void i2cInit()
-{
-  I2C_0.begin(I2C_SDA, I2C_SCL);
-}
+// void i2cInit()
+// {
+//   I2C_0.begin(I2C_SDA, I2C_SCL);
+// }
 
 static inline void pinInit(void) {
   #if defined(LEGO_VALVE_RELAY)
