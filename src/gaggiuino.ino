@@ -22,11 +22,6 @@ eepromValues_t runningCfg;
 TwoWire I2C_0 = TwoWire(0);
 #endif
 
-// void i2cInit()
-// {
-//   I2C_0.begin(I2C_SDA, I2C_SCL);
-// }
-
 void setup(void) {
   LOG_INIT();
   LOG_INFO("Gaggiuino (fw: %s) booting", AUTO_VERSION);
