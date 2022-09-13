@@ -89,14 +89,16 @@ void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewA
   if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
     setBoilerOn();
     brewActive ? setPumpFullOn() : setPumpOff();
+    debugPrintln("Steam wand hot water active");
   }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
     setBoilerOn();
     if (currentState.pressure < 1.5f) {
-      #ifndef SINGLE_BOARD
+      #if defined(SINGLE_BOARD) || defined(ESP32)
         openValve();
       #endif
       setPumpToRawValue(5);
     }
+    debugPrintln("Steaming active");
   } else {
     setBoilerOff();
     (currentState.pressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();

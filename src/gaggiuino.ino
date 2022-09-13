@@ -42,53 +42,53 @@ void setup(void) {
   #endif
 
   lcdInit();
-  LOG_INFO("LCD Init");
+  debugPrintln("LCD Init");
 
   // Various pins operation mode handling
   pinInit();
-  LOG_INFO("Pin init");
+  debugPrintln("Pin init");
 
 #if defined(DEBUG_ENABLED)
   // Debug init if enabled
   dbgInit();
-  LOG_INFO("DBG init");
+  debugPrintln("DBG init");
 #endif
 
   setBoilerOff();  // relayPin LOW
-  LOG_INFO("Boiler turned off");
+  debugPrintln("Boiler turned off");
 
   //Pump
   setPumpOff();
-  LOG_INFO("Pump turned off");
+  debugPrintln("Pump turned off");
 
   // Valve
   closeValve();
-  LOG_INFO("Valve closed");
+  debugPrintln("Valve closed");
 
   // Initialising the vsaved values or writing defaults if first start
   eepromInit();
   eepromValues_t eepromCurrentValues = eepromGetCurrentValues();
-  LOG_INFO("EEPROM Init");
+  debugPrintln("EEPROM Init");
 
   thermocoupleInit();
-  LOG_INFO("Thermocouple Init");
+  debugPrintln("Thermocouple Init");
 
   lcdUploadCfg(eepromCurrentValues);
-  LOG_INFO("LCD cfg uploaded");
+  debugPrintln("LCD cfg uploaded");
 
   pressureSensorInit();
-  LOG_INFO("Pressure sensor init");
+  debugPrintln("Pressure sensor init");
 
   // Scales handling
   scalesInit(eepromCurrentValues.scalesF1, eepromCurrentValues.scalesF2);
-  LOG_INFO("Scales init");
+  debugPrintln("Scales init");
 
   // Pump init
   pumpInit(eepromCurrentValues.powerLineFrequency, eepromCurrentValues.pumpFlowAtZero);
-  LOG_INFO("Pump init");
+  debugPrintln("Pump init");
 
   pageValuesRefresh(true);
-  LOG_INFO("Setup sequence finished");
+  debugPrintln("Setup sequence finished");
 }
 
 //##############################################################################################################################

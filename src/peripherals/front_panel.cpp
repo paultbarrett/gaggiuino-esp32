@@ -8,20 +8,20 @@ void setFPLED(uint8_t pin, int state)
 {
     if (state == 1)
     {
-        frontPanel.digitalWrite(pin, HIGH);
+        frontPanel.digitalWrite(pin, LOW);
     } else 
     {
-        frontPanel.digitalWrite(pin, LOW);
+        frontPanel.digitalWrite(pin, HIGH);
     }
     
 }
 
 void frontPanelInit(void)
 {
-    // Init LEDs
-    frontPanel.pinMode(powerLEDPin, OUTPUT, LOW);
-	frontPanel.pinMode(brewLEDPin, OUTPUT, LOW);
-    frontPanel.pinMode(steamLEDPin, OUTPUT,LOW);
+    // Init LEDs with starting state
+    frontPanel.pinMode(powerLEDPin, OUTPUT, LOW); // Turns on power LED pepetually
+	frontPanel.pinMode(brewLEDPin, OUTPUT, HIGH);
+    frontPanel.pinMode(steamLEDPin, OUTPUT, HIGH);
     
     // Init Buttons
     frontPanel.pinMode(brewPin, INPUT);
@@ -29,6 +29,11 @@ void frontPanelInit(void)
     
     // Turn on power LED
     setFPLED(powerLEDPin,1);
+    frontPanel.digitalWrite(powerLEDPin, LOW);
+
+    // Turn off brew & steam LED
+    setFPLED(brewLEDPin,0);
+    setFPLED(steamLEDPin,0);
 
     if (frontPanel.begin())
     {
